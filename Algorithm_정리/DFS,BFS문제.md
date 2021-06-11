@@ -1958,3 +1958,660 @@ else:
 
 ```
 
+
+
+## BOJ_2583_영역구하기
+
+> [BOJ_2583_영역구하기](https://www.acmicpc.net/problem/2583)
+
+```python
+'''
+1. 빈 배열을 만들어준다(M행 N열)
+2. 직사각형 좌표를 입력받고 빈 배열에 -1로 표시해준다
+3. dfs 함수를 만들고 상하좌우를 살펴보며 방문하지 않았고,값이 0인 것에 사각형 개수번호를 입력해준다.
+'''
+import sys
+sys.setrecursionlimit(10**8)
+di = [0,1,0,-1]#우하좌상
+dj = [1,0,-1,0]
+def DFS(i,j):
+    global cnt
+    arr[i][j] = cnt
+    visited[i][j] = True
+    for d in range(4):
+        ni = i + di[d]
+        nj = j + dj[d]
+        if ni < 0 or ni >= M or nj < 0 or nj >= N:
+            continue
+        if visited[ni][nj]:
+            continue
+        if arr[ni][nj] == -1:
+            continue
+        DFS(ni,nj)
+
+
+M,N,K = map(int,input().split())
+arr = [[0 for j in range(N)] for i in range(M)]
+visited = [[False for j in range(N)] for i in range(M)]
+cnt = 0
+for k in range(K):
+    #왼쪽위 꼭지점, 오른쪽 아래 꼭지점
+    x1,y1,x2,y2 = map(int,input().split())
+    for i in range(y1,y2):
+        for j in range(x1,x2):
+            arr[i][j] = -1
+
+for i in range(M):
+    for j in range(N):
+        if not visited[i][j] and not arr[i][j]:
+            cnt += 1
+            DFS(i,j)
+
+print(cnt)
+ans = [0]*cnt
+for i in arr:
+    for c in range(1,cnt+1):
+        ans[c-1] += i.count(c)
+print(*sorted(ans))
+```
+
+- 다른코드
+
+```python
+import sys
+M,N,K = map(int, sys.stdin.readline().split())
+g = [[0]*M for _ in range(N)]
+for _ in range(K):
+    frmx, frmy, tox, toy = map(int, sys.stdin.readline().split())
+
+    for x in range(frmx, tox):
+        for y in range(frmy, toy):
+            g[x][y] = 1
+
+land = []
+
+def dfs(x,y):
+    count = 1
+    dx = [-1,0,1,0]
+    dy = [0,1,0,-1]
+
+    g[x][y] = 1
+    stack = [(x,y)]
+
+    while stack:
+        x,y = stack.pop()
+        for i in range(4):
+            nxtx = x+dx[i]
+            nxty = y+dy[i]
+
+            if 0<=nxtx<N and 0<=nxty<M and g[nxtx][nxty] == 0:
+                g[nxtx][nxty] = 1
+                stack.append((nxtx, nxty))
+                count += 1
+
+    land.append(count)
+
+for i in range(N):
+    for j in range(M):
+        if g[i][j] == 0:
+            dfs(i,j)
+
+land.sort()
+print(len(land))
+print(" ".join(str(x) for x in land))
+```
+
+```python
+def adj(i, j, m, n, f):
+    if i and f[i-1][j]:
+        yield (i-1, j)
+    if j and f[i][j-1]:
+        yield (i, j-1)
+    if i-m+1 and f[i+1][j]:
+        yield (i+1, j)
+    if j-n+1 and f[i][j+1]:
+        yield (i, j+1)
+
+
+def main1(inputs = None):
+    m, n, k = map(int, input().split())
+    area = [[1] * n for y in range(m)]
+    for _ in range(k):
+        x1, y1, x2, y2 = map(int, input().split())
+        for y in range(y1, y2):
+            area[y][x1:x2] = [0] * (x2 - x1)
+
+    h = 100
+    res = []
+
+    for y, row in enumerate(area):
+        for x, num in enumerate(row):
+            if num:
+                area[y][x] = False
+                que = [(y, x)]
+                s = 1
+                while que:
+                    i0, j0 = que.pop(0)
+                    for u, v in adj(i0, j0, m, n, area):
+                        que.append((u, v))
+                        area[u][v] = False
+                        s += 1
+                res.append(s)
+    print(len(res))
+    res.sort()
+    print(' '.join([str(i) for i in res]))
+
+main1()
+```
+
+## BOJ_1987_알파벳
+
+> [BOJ_1987_알파벳](https://www.acmicpc.net/problem/1987)
+>
+> DFS로 풀면 시간초과..BFS로 풀면 통과했따..
+>
+> set을 이용하니 Python3에서도 통과
+
+```python
+'''
+1. 배열을 입력받는다
+2. DFS 이용해 푼다.
+3. 배열을 보면서 상하좌우 중 한 곳을 가는데 이미 이동한 동일한 알파벳은 못지나감
+4. 최대 몇칸
+'''
+import sys
+from collections import deque
+
+input = sys.stdin.readline
+di = [0,1,0,-1] #우하좌상
+dj = [1,0,-1,0]
+def DFS(pi,pj,go,cnt):
+    global MAX
+    if MAX < cnt:
+        MAX = cnt
+    for d in range(4):
+        ni = pi + di[d]
+        nj = pj + dj[d]
+        if ni < 0 or ni >= R or nj < 0 or nj >= C:
+            continue
+        if arr[ni][nj] in go:
+            continue
+        go.append(arr[ni][nj])
+        DFS(ni,nj,go,cnt+1)
+        go.pop()
+
+def BFS(q):
+    global MAX
+    while q:
+        pi,pj,go = q.pop()
+        for d in range(4):
+            ni = pi + di[d]
+            nj = pj + dj[d]
+            if ni < 0 or ni >= R or nj < 0 or nj >= C:
+                continue
+            if arr[ni][nj] in go:
+                continue
+            q.append((ni,nj,go+arr[ni][nj]))
+            MAX = max(MAX, len(go)+1)
+
+def setBFS(i,j):
+    global MAX
+    q = set()
+    q.add((i,j,arr[i][j]))
+    while q:
+        pi,pj,go = q.pop()
+        MAX = max(MAX,len(go))
+        if MAX == 26:
+            return
+        for d in range(4):
+            ni = pi + di[d]
+            nj = pj + dj[d]
+            if ni < 0 or ni >= R or nj < 0 or nj >= C:
+                continue
+            if arr[ni][nj] in go:
+                continue
+            q.add((ni,nj,go+arr[ni][nj]))
+    return
+R,C = map(int,input().split( ))
+arr = []
+for _ in range(R):
+    arr.append(list(input()))
+MAX = 1
+# 1) DFS
+# DFS(0,0,[arr[0][0]],1)
+# 2) BFS
+# go = deque()
+# go.append((0,0,arr[0][0]))
+# BFS(go)
+# 3) set 이용
+setBFS(0,0)
+print(MAX)
+
+```
+
+- python3으로 통과한 코드
+
+```python
+import sys
+from collections import deque
+
+
+# https://www.acmicpc.net/problem/1987
+#
+# 세로 R칸, 가로 C칸으로 된 표 모양의 보드가 있다. 보드의 각 칸에는 대문자 알파벳이 하나씩 적혀 있고, 좌측 상단 칸 (1행 1열) 에는 말이 놓여 있다.
+# 말은 상하좌우로 인접한 네 칸 중의 한 칸으로 이동할 수 있는데, 새로 이동한 칸에 적혀 있는 알파벳은 지금까지 지나온 모든 칸에 적혀 있는
+# 알파벳과는 달라야 한다. 즉, 같은 알파벳이 적힌 칸을 두 번 지날 수 없다.
+# 좌측 상단에서 시작해서, 말이 최대한 몇 칸을 지날 수 있는지를 구하는 프로그램을 작성하시오. 말이 지나는 칸은 좌측 상단의 칸도 포함된다.
+
+# Input Example
+# 2 4
+# CAAB
+# ADCB
+
+
+def dfs(x, y):
+    global board, R, C
+
+    max_depth = 0
+
+    queue = set()
+    queue.add((x, y, board[y][x]))
+
+    while queue:
+        current_x, current_y, current_visited = queue.pop()
+        max_depth = max(max_depth, len(current_visited))
+        if max_depth == 26:
+            return 26
+
+        for movement in movement_array:
+            next_x = current_x + movement[0]
+            next_y = current_y + movement[1]
+            if 0 <= next_x < C and 0 <= next_y < R and board[next_y][next_x] not in current_visited:
+                queue.add((next_x, next_y, current_visited + board[next_y][next_x]))
+
+    return max_depth
+
+
+R, C = map(int, sys.stdin.readline().split())
+board = []
+for _ in range(R):
+    row = list(sys.stdin.readline().strip())
+    board.append(row)
+
+movement_array = [
+    (-1, 0),
+    (1, 0),
+    (0, -1),
+    (0, 1)
+]
+start = (0, 0)
+print(dfs(*start))
+
+```
+
+
+
+## BOJ_10026_적록색약
+
+> [BOJ_10026_적록색약](https://www.acmicpc.net/problem/10026)
+
+```python
+'''
+적록색약 빨간색, 초록색 차이를 거의 느끼지 못함
+R(빨강), G(초록), B(파랑)
+상하좌우로 같은색상이 인접해 있으면 같은 구역에 속함(색상의 차이를 느끼지 못하는 경우 같은 영역이라 함)
+1. 배열을 입력 받는다.
+2. DFS로 보고, 적록색약이 아닌경우, 색이 다를 떄 cnt를 +1해줌
+3. 적록색약인 경우, 빨간색이나 초록색일때 다음 색이 빨간색이나 초록색이면 두 색을 같은 색으로 판단한다.
+'''
+import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(10**6)
+
+di = [0,1,0,-1]#우하좌상
+dj = [1,0,-1,0]
+def DFS(i,j,color,blindness):
+    global normal, blindCnt
+    visited[i][j] = True
+    for d in range(4):
+        ni = i + di[d]
+        nj = j + dj[d]
+        if ni < 0 or ni >= N or nj < 0 or nj >= N:
+            continue
+        if visited[ni][nj]:
+            continue
+        if color != arr[ni][nj]:
+            # 적록색약인 경우
+            if blindness and (color in colorList and arr[ni][nj] in colorList):
+                DFS(ni,nj,arr[ni][nj],blindness)
+            else:
+                continue
+        DFS(ni, nj, arr[ni][nj], blindness)
+
+
+N = int(input())
+arr = [list(input()) for _ in range(N)]
+
+visited = [[False for j in range(N)] for i in range(N)]
+colorList = ['R','G']
+normal = 0
+blindCnt = 0
+
+for i in range(N):
+    for j in range(N):
+        if not visited[i][j]:
+            # 적록색약인경우
+            blindCnt += 1
+            DFS(i,j,arr[i][j],True)
+visited = [[False for j in range(N)] for i in range(N)]
+for i in range(N):
+    for j in range(N):
+        if not visited[i][j]:
+            # 아닌경우
+            normal += 1
+            DFS(i,j,arr[i][j],False)
+print(normal,blindCnt)
+```
+
+- 배열을 다르게 받았다
+
+```python
+'''
+적록색약 빨간색, 초록색 차이를 거의 느끼지 못함
+R(빨강), G(초록), B(파랑)
+상하좌우로 같은색상이 인접해 있으면 같은 구역에 속함(색상의 차이를 느끼지 못하는 경우 같은 영역이라 함)
+1. 배열을 입력 받는다.
+2. DFS로 보고, 적록색약이 아닌경우, 색이 다를 떄 cnt를 +1해줌
+3. 적록색약인 경우, 빨간색이나 초록색일때 다음 색이 빨간색이나 초록색이면 두 색을 같은 색으로 판단한다.
+적록색약은 배열을 받을 때 G를 R로 바꿔줌
+'''
+import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(10**6)
+
+di = [0,1,0,-1]#우하좌상
+dj = [1,0,-1,0]
+def DFS(i,j,color,arr):
+    visited[i][j] = True
+    for d in range(4):
+        ni = i + di[d]
+        nj = j + dj[d]
+        if ni < 0 or ni >= N or nj < 0 or nj >= N:
+            continue
+        if visited[ni][nj]:
+            continue
+        if color != arr[ni][nj]:
+            continue
+        DFS(ni, nj, arr[ni][nj], arr)
+N = int(input())
+normalArr, blindArr = [['' for j in range(N)] for i in range(N)],[['' for j in range(N)] for i in range(N)]
+for i in range(N):
+    temp = list(input())
+    for j in range(N):
+        normalArr[i][j] = temp[j]
+        if temp[j] == "G":
+            blindArr[i][j] = "R"
+        else:
+            blindArr[i][j] = temp[j]
+visited = [[False for j in range(N)] for i in range(N)]
+normalCnt, blindnessCnt = 0,0
+for i in range(N):
+    for j in range(N):
+        if not visited[i][j]:
+            normalCnt+=1
+            DFS(i,j,normalArr[i][j],normalArr)
+
+visited = [[False for j in range(N)] for i in range(N)]
+for i in range(N):
+    for j in range(N):
+        if not visited[i][j]:
+            blindnessCnt+=1
+            DFS(i,j,blindArr[i][j],blindArr)
+print(normalCnt,blindnessCnt)
+```
+
+
+
+- 다른코드
+
+```python
+#백준 10026번 - 적록색약
+
+'''
+
+문제
+적록색약은 빨간색과 초록색의 차이를 거의 느끼지 못한다.
+따라서, 적록색약인 사람이 보는 그림은 아닌 사람이 보는 그림과는 좀 다를 수 있다.
+크기가 N×N인 그리드의 각 칸에 R(빨강), G(초록), B(파랑) 중 하나를 색칠한 그림이 있다.
+그림은 몇 개의 구역으로 나뉘어져 있는데, 구역은 같은 색으로 이루어져 있다.
+또, 같은 색상이 상하좌우로 인접해 있는 경우에 두 글자는 같은 구역에 속한다.
+(색상의 차이를 거의 느끼지 못하는 경우도 같은 색상이라 한다)
+
+예를 들어, 그림이 아래와 같은 경우에
+
+RRRBB
+GGBBB
+BBBRR
+BBRRR
+RRRRR
+
+적록색약이 아닌 사람이 봤을 때 구역의 수는 총 4개이다. (빨강 2, 파랑 1, 초록 1)
+하지만, 적록색약인 사람은 구역을 3개 볼 수 있다. (빨강-초록 2, 파랑 1)
+그림이 입력으로 주어졌을 때, 적록색약인 사람이 봤을 때와
+아닌 사람이 봤을 때 구역의 수를 구하는 프로그램을 작성하시오.
+
+입력
+첫째 줄에 N이 주어진다. (1 ≤ N ≤ 100)
+
+둘째 줄부터 N개 줄에는 그림이 주어진다.
+
+출력
+적록색약이 아닌 사람이 봤을 때의 구역의 개수와 적록색약인 사람이 봤을 때의 구역의 수를 공백으로 구분해 출력한다.
+
+예제 입력 1
+5
+RRRBB
+GGBBB
+BBBRR
+BBRRR
+RRRRR
+
+예제 출력 1
+4 3
+'''
+
+
+import sys
+
+sys.setrecursionlimit(1000000)
+a = int(sys.stdin.readline())
+graphForNomal= [([0] * a) for _ in range(a)]
+graphForRedGreen= [([0] * a) for _ in range(a)]
+count_Nomal = 0
+count_Red_Green = 0
+
+for i in range(a) :
+    str = sys.stdin.readline()
+    for j in range(a) :
+        graphForNomal[i][j] = str[j]
+        if str[j] == "R" :
+            graphForRedGreen[i][j] = "G"
+        else :
+            graphForRedGreen[i][j] = str[j]
+
+def nomal_Dfs(graph, color, sero, garo) :
+    if garo + 1 < a and (color == graph[sero][garo + 1]):
+        graph[sero][garo + 1] = "A"
+        nomal_Dfs(graph, color, sero, garo + 1)
+
+    if sero + 1 < a and (color == graph[sero + 1][garo]) :
+        graph[sero + 1][garo] = "A"
+        nomal_Dfs(graph, color, sero + 1, garo)
+
+    if garo - 1 > -1 and (color == graph[sero][garo - 1]) :
+        graph[sero][garo - 1] = "A"
+        nomal_Dfs(graph, color, sero, garo - 1)
+
+    if sero - 1 > -1 and (color == graph[sero - 1][garo]) :
+        graph[sero - 1][garo] = "A"
+        nomal_Dfs(graph, color, sero - 1, garo)
+
+#이거 필요 없을듯..?
+'''
+def red_Green_Dfs(color, sero, garo) :
+    if garo + 1 < a and ()
+'''
+
+for i in range(a) :
+    for j in range(a) :
+        if graphForNomal[i][j] != "A" :
+            temp = graphForNomal[i][j]
+            graphForNomal[i][j] = "A"
+            count_Nomal = count_Nomal + 1
+            nomal_Dfs(graphForNomal, temp, i, j)
+
+for i in range(a) :
+    for j in range(a) :
+        if graphForRedGreen[i][j] != "A" :
+            temp = graphForRedGreen[i][j]
+            graphForRedGreen[i][j] = "A"
+            count_Red_Green = count_Red_Green + 1
+            nomal_Dfs(graphForRedGreen, temp, i, j)
+
+print(count_Nomal, end = ' ')
+print(count_Red_Green)
+```
+
+
+
+## BOJ_1941_소문난칠공주
+
+> [BOJ_1941_소문난칠공주](https://www.acmicpc.net/problem/status/1941/28/1)
+
+```python
+'''
+1. 7명의 여학생으로 구성
+2. 강한 결속력 위해, 7명의 자리는 서로 가로나 세로로 반드시 인접
+3. 반드시 이다솜파(S) 학생들로만 구성될 필요 없다
+4. 그러나 이다솜파(S)가 적어도 4명이상
+모든 경우의수 출력
+
+S(이다솜)파 , Y(임도연파) 5줄
+1. DFS(i,j,group)으로 한 뒤 방문은 찾을때마다 리셋(set으로 좌표를 넣을 예정)
+2. group에는 S,Y와 좌표를 추가하는데 만약 Y가 4개이상이면 더이상 Y를 넣지 못함
+3. 결과도 set으로 하고 group을 정렬해서 중복되지 않게 넣는다.
+'''
+import sys
+input = sys.stdin.readline
+
+di = [0,1,0,-1] #우하좌상
+dj = [1,0,-1,0]
+def DFS(group,cnt,Ycnt):
+    global result
+    if Ycnt > 3:
+        return
+    if cnt == 7:
+        group.sort()
+        # print(group)
+        result.add(tuple(group))
+    else:
+        adj = []
+        for p in range(len(group)):
+            for d in range(4):
+                ni = group[p][0] + di[d]
+                nj = group[p][1] + dj[d]
+                if ni < 0 or ni >= 5 or nj < 0 or nj >= 5:
+                    continue
+                if (ni,nj) in group:
+                    continue
+                adj.append((ni,nj))
+        for a in adj:
+            nexti = a[0]
+            nextj = a[1]
+            if arr[nexti][nextj] == "S":
+                DFS(group + [(nexti,nextj)],cnt+1,Ycnt)
+            else:
+                DFS(group + [(nexti,nextj)],cnt+1,Ycnt+1)
+
+
+
+
+arr = [list(input()) for _ in range(5)]
+result = set()
+for i in range(5):
+    for j in range(5):
+        if arr[i][j] == "S":
+            DFS([(i,j)],1,0)
+
+print(len(result))
+
+'''
+SSSSS
+SSSSS
+SSSSS
+SSSSS
+SSSSS
+'''
+```
+
+- 다른코드
+
+```python
+import sys
+from collections import deque
+input = sys.stdin.readline
+
+dx = [0,1,0,-1]
+dy = [1,0,-1,0]
+princess = deque()
+ans = set()
+A = [[] for _ in range(5)]
+visit = [[False] * 5 for _ in range(5)]
+
+def go(n, cnt):
+    if (cnt + (7 - n) < 4):
+        return
+
+    if n == 7:
+        if cnt >= 4:
+            temp = list(princess)
+            temp.sort()
+            temp = tuple(temp)
+            ans.add(temp)
+        return
+
+    possible = set()
+    for node in princess:
+        for i in range(4):
+            nx = node[0] + dx[i]
+            ny = node[1] + dy[i]
+            if nx < 0 or ny < 0 or nx == 5 or ny == 5 or visit[nx][ny]:
+                continue
+
+            possible.add((nx,ny))
+
+    for node in possible:
+
+        visit[node[0]][node[1]] = True
+        princess.append(node)
+        if A[node[0]][node[1]] == 'S':
+            go(n+1, cnt+1)
+        else:
+            go(n+1, cnt)
+        princess.pop();
+        visit[node[0]][node[1]] = False
+
+for i in range(5):
+    A[i] = list(input().rstrip())
+
+for i in range(5):
+    for j in range(5):
+        if A[i][j] == 'S':
+            visit[i][j] = True
+            princess.append((i,j))
+            go(1,1)
+            princess.popleft()
+
+print(len(ans))
+```
+
