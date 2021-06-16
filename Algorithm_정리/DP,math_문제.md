@@ -630,6 +630,147 @@ for i in num:
     else: print(0)
 ```
 
+## BOJ_9020_골드바흐의추측
+
+> [BOJ_9020_골드바흐의추측](https://www.acmicpc.net/problem/9021)
+>
+> 아래와 같이 풀면 시간초과! 에라토스테네스의 체로 풀어야된다!
+>
+> ```python
+> import sys
+> input = sys.stdin.readline
+> 
+> def decimal(n):
+>     decimalList = []
+>     for d in range(2,n):
+>         for i in range(2,d):
+>             if d % i == 0:
+>                 break
+>         else:
+>             decimalList.append(d)
+>     result = []
+>     LEN = len(decimalList)
+>     for d1 in range(LEN):
+>         for d2 in range(d1,LEN):
+>             if decimalList[d1] + decimalList[d2] > N:
+>                 break
+>             elif decimalList[d1] + decimalList[d2] == N:
+>                 result.append((decimalList[d1],decimalList[d2]))
+>     ans = []
+>     if len(result) >= 2:
+>         MIN = 987654321
+>         while result:
+>             r1,r2 = result.pop(0)
+>             if MIN > abs(r1-r2):
+>                 MIN = abs(r1-r2)
+>                 ans = [r1,r2]
+>     else:
+>         r1,r2 = result.pop()
+>         ans = [r1,r2]
+>     return ans
+> 
+> T = int(input())
+> for tc in range(1,T+1):
+>     N = int(input())
+>     ans = decimal(N)
+>     print(*ans)
+> ```
+>
+> 
+
+```python
+import sys
+input = sys.stdin.readline
+# 에라토스테네스의 체
+def prime_list(n):
+    sieve = [True] * n
+    m = int(n ** 0.5)
+    for i in range(2, m + 1):
+        if sieve[i] == True:
+            for j in range(i + i, n, i):
+                sieve[j] = False
+    return sieve
+
+
+def gold(primes, n):
+    index = 0
+    while True:
+        if primes[n // 2 - index] and primes[n // 2 + index]:
+            return (n // 2 - index, n // 2 + index)
+        index += 1
+
+
+primes = prime_list(10001)
+
+T = int(input())
+for tc in range(1,T+1):
+    N = int(input())
+    answer = gold(primes, N)
+    print(answer[0], answer[1])
+```
+
+- 다른코드
+
+```python
+from sys import stdin
+input = stdin.readline
+
+T = int(input())
+answer = ""
+result = [False, False, True] + [True, False] * 5000
+for number in range(3, 101, 2):
+    if result[number]:
+        result[number*2::number] = [False] * len(result[number*2::number])
+
+for tc in range(T):
+    N = int(input())
+    if N == 4:
+        answer += "2 2\n"
+        continue
+    harf_N = N//2
+    if not harf_N % 2:
+        harf_N += 1
+    for i in range(harf_N, N, 2):
+        if result[i] and result[N-i]:
+            answer += "{} {}".format(N - i, i) + "\n"
+            break
+print(answer, end="")
+```
+
+```python
+import sys
+read = sys.stdin.readline
+
+def goldBache(k, prime, MAX):
+    cnt = 0
+    half = k // 2 
+    for val in range(half, MAX):
+        if prime[val] and prime[k - val]:
+            return val
+    return -1
+
+
+MAX = 10001
+prime = [1] * MAX 
+prime[0] = 0
+prime[1] = 0
+for i in range(MAX):
+    if prime[i] == 1:
+        for not_prime in range(2 * i, MAX, i):
+            prime[not_prime] = 0
+
+n = int(input())
+while(n > 0):
+    k = int(read())
+    pair_1 = goldBache(k, prime, MAX)
+    pair_2 = k - pair_1
+    print("{} {}".format(pair_2, pair_1))
+    n -= 1
+
+```
+
+
+
 
 
 -------
