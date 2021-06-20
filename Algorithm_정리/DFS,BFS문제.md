@@ -2725,3 +2725,108 @@ def solution(n, computers):
     return len(set(temp))
 ```
 
+## 프로그래머스_단어변환
+
+```python
+'''
+begin이 target으로 변환돼야되는데 한번에 한개의 알파벳만 바꿀수 있고 그 단어가 words에 있는 단어야 된다.
+1. begin과 target이 다른 것을 words에 있는 단어 중 begin과 같은 단어가 1개 차이나고 target과 begin이랑 공통되는 것이 1개 더 많아야된다.
+2. 바뀐 것으로는 다시 바뀌지 않게 words에서 뺴줌
+'''
+
+
+def solution(begin, target, words):
+    answer = 0
+    bigin_target_cnt = 0
+    for i in range(len(begin)):
+        if begin[i] == target[i]:
+            bigin_target_cnt += 1
+    print('begin과 target공통', bigin_target_cnt)
+    while True:
+        if begin == target:
+            break
+        change_target = [0, 0]
+        for i in range(len(words)):
+            word = words[i]
+            begin_cnt = 0
+            target_cnt = 0
+            for w in range(len(word)):
+                if word[w] == begin[w]:
+                    begin_cnt += 1
+                if word[w] == target[w]:
+                    target_cnt += 1
+            if (begin_cnt == len(begin) - 1) and (change_target[1] < target_cnt):
+                change_target = [i, target_cnt]
+        if change_target != [0, 0]:
+            print(begin, '->', words[change_target[0]])
+            begin = words[change_target[0]]
+            words.pop(change_target[0])
+            bigin_target_cnt += 1
+            answer += 1
+        else:
+            answer = 0
+            break
+
+    return answer
+
+print(solution("hit","cog",["hot", "dot", "dog", "lot", "log"]))
+```
+
+- 다른풀이
+
+```python
+def solution(begin, target, words):
+    answer = 0
+    Q = [begin]
+
+    while True:
+        temp_Q = []
+        for word_1 in Q:
+            if word_1 == target:
+                    return answer
+            for i in range(len(words)-1, -1, -1):
+                word_2 = words[i]
+                if sum([x!=y for x, y in zip(word_1, word_2)]) == 1:
+                    temp_Q.append(words.pop(i))
+
+        if not temp_Q:
+            return 0
+        Q = temp_Q
+        answer += 1
+
+```
+
+```python
+from collections import deque
+
+
+def get_adjacent(current, words):
+    for word in words:
+        if len(current) != len(word):
+            continue
+
+        count = 0
+        for c, w in zip(current, word):
+            if c != w:
+                count += 1
+
+        if count == 1:
+            yield word
+
+
+def solution(begin, target, words):
+    dist = {begin: 0}
+    queue = deque([begin])
+
+    while queue:
+        current = queue.popleft()
+
+        for next_word in get_adjacent(current, words):
+            if next_word not in dist:
+                dist[next_word] = dist[current] + 1
+                queue.append(next_word)
+
+    return dist.get(target, 0)
+
+```
+
