@@ -2900,3 +2900,62 @@ def solution(tickets):
 print(solution( [["ICN", "BOO"], ["ICN", "COO"], ["COO", "DOO"], ["DOO", "COO"], ["BOO", "DOO"], ["DOO", "BOO"], ["BOO", "ICN"], ["COO", "BOO"]]))
 ```
 
+- 다른 풀이
+
+```python
+def solution(tickets):
+    connections, visited = {}, {}
+
+    for tic in tickets:
+        connections[tic[0]] = list()
+        visited[tic[0]+tic[1]]=0
+
+    num_airport=0
+
+    for tic in tickets:
+        visited[tic[0] + tic[1]] +=1
+        num_airport+=1
+
+        connections[tic[0]].append(tic[1])
+        connections[tic[0]].sort()
+
+    result_set = list()
+
+
+    for next_port in connections['ICN']:
+        tmp=visited.copy()
+        tmp['ICN'+next_port]-=1
+        dfs(next_port, 1, num_airport, result_set, tmp,
+            ['ICN', next_port], connections)
+
+    result_set.sort()
+
+    return result_set[0]
+
+
+def dfs(v, count, num, result_set, visited, line, connections):
+
+    if count == num:
+
+        result_set.append(line)
+        return
+
+    if not v in connections:
+        return
+
+
+    for next_port in connections[v]:
+        if  visited[v + next_port]!=0:
+
+            visited[v + next_port] -=1
+            tmp = line[:]
+            tmp.append(next_port)
+            dfs(next_port, count + 1, num, result_set, visited, tmp,
+                connections)
+            visited[v+next_port]+=1
+
+
+# solution(
+# [["ICN","BOO" ], [ "ICN", "COO" ], [ "COO", "DOO" ], ["DOO", "COO"], [ "BOO", "DOO"] ,["DOO", "BOO"], ["BOO", "ICN" ], ["COO", "BOO"]])
+```
+
