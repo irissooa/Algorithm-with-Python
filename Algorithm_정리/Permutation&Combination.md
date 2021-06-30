@@ -350,6 +350,35 @@ def perm(idx):
 perm(0)
 ```
 
+### 모든 순열(코드!!!)
+
+```python
+def perm(a):
+    i = len(a) - 1
+    while i > 0 and a[i-1] >= a[i]:
+        i -= 1
+    if i <= 0:
+        return False
+    j = len(a) - 1
+    while a[j] <= a[i-1]:
+        j -= 1
+    a[i-1], a[j] = a[j], a[i-1]
+
+    j = len(a) - 1
+    while i < j:
+        a[i],a[j] = a[j],a[i]
+        i += 1
+        j -= 1
+    return True
+
+n = int(input())
+a = list(range(n)) # idx라고 생각하면됨
+while True:
+    print(' '.join(map(str,a)))
+    if not perm(a):
+        break
+```
+
 
 
 ## 관련문제

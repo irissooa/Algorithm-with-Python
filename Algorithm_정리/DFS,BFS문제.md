@@ -2959,3 +2959,343 @@ def dfs(v, count, num, result_set, visited, line, connections):
 # [["ICN","BOO" ], [ "ICN", "COO" ], [ "COO", "DOO" ], ["DOO", "COO"], [ "BOO", "DOO"] ,["DOO", "BOO"], ["BOO", "ICN" ], ["COO", "BOO"]])
 ```
 
+
+
+## BOJ_1697_숨바꼭질
+
+> [BOJ_1697_숨바꼭질](https://www.acmicpc.net/problem/1697)
+>
+> - 이전 풀이 정답
+>
+> ```python
+> from collections import deque
+> def BFS(n):
+>     q = deque()
+>     q.append(n)
+>     while q:
+>         X = q.popleft()
+>         if X == K:
+>             return dist[K]
+>         a = X-1
+>         b = X+1
+>         c = X*2
+>         if 0 <= a < MAX and dist[a] ==0:
+>             dist[a] = dist[X]+1
+>             q.append(a)
+>         if 0 <= b < MAX and dist[b] ==0:
+>             dist[b] = dist[X]+1
+>             q.append(b)
+>         if 0 <= c <MAX and dist[c] ==0:
+>             dist[c] = dist[X]+1
+>             q.append(c)
+> 
+> N,K = map(int,input().split())
+> # N,K=5,17
+> MAX = 100001
+> dist = [0 for _ in range(MAX)]
+> print(BFS(N))
+> ```
+>
+> 
+
+```python
+'''
+수빈 현재 점(N), 동생(K)
+수빈 위치 X 걷는다면 X+1, X-1 이동, 순간이동 2X
+수빈이가 동생을 찾을 수 있는 가장 빠른 시간 몇 초 후
+
+풀이(BFS)
+1. 수빈의 위치 X에서 X+1, X-1, 2X로 이동 후 q에 담기
+2. dist기록, 그전 기록이 있으면 return
+3. K에 도달했을때 dist출력
+'''
+import sys
+input = sys.stdin.readline
+from collections import deque
+
+
+def BFS(q):
+    dist[N] = 1
+    while q:
+        n = q.popleft()
+        if n == K:
+            break
+        for next in (n-1,n+1,2*n):
+            if next < 0 or next >= 100001:
+                continue
+            if dist[next]:
+                continue
+            dist[next] = dist[n] + 1
+            q.append(next)
+
+
+N, K = map(int,input().split())
+q = deque()
+dist = [0 for _ in range(100001)]
+q.append(N)
+BFS(q)
+print(dist[K]-1)
+```
+
+- 다른풀이
+
+```python
+def c(n,k):
+    if n>=k:
+        return n-k
+    elif k == 1:
+        return 1
+    elif k%2:
+        return 1+min(c(n,k-1),c(n,k+1))
+    else:
+        return min(k-n, 1+c(n,k//2))
+    
+n, k = map(int,input().split())
+print(c(n,k))
+```
+
+
+
+```python
+import sys
+input = sys.stdin.readline
+
+s, e = map(int, input().split())
+
+def sol(s, e):
+
+    if s >= e:
+        return s-e
+ 
+    answer = e-s
+    step = 0
+    nums = [e]
+
+    while nums:
+        step += 1
+        temp = []
+        for n in nums:
+            if n%2:
+                if n-1 == s:
+                    answer = min(answer, step)
+                else:
+                    temp.append(n-1)
+                    temp.append(n+1)
+            else:
+                if n//2 < s:
+                    s - n//2 + step
+                    answer = min(answer, s - n//2 + step, n - s + step - 1)
+                elif n//2 == s:
+                    answer = min(answer, step)
+                else:
+                    temp.append(n//2)
+        nums = temp
+
+    return answer
+
+print(sol(s, e))
+```
+
+
+
+## BOJ_12851_숨바꼭질2
+
+> [BOJ_12851_숨바꼭질2](https://www.acmicpc.net/problem/1697)
+
+```python
+'''
+수빈 현재 점(N), 동생(K)
+수빈 위치 X 걷는다면 X+1, X-1 이동, 순간이동 2X
+수빈이가 동생을 찾을 수 있는 가장 빠른 시간 몇 초 후
+
+풀이(BFS)
+1. 수빈의 위치 X에서 X+1, X-1, 2X로 이동 후 q에 담기
+2. dist기록, 그전 기록이 있으면 return
+3. K에 도달했을때 dist출력
+4. 개수도 출력해야되니까 같은 초수도 세기
+'''
+import sys
+input = sys.stdin.readline
+from collections import deque
+
+def BFS():
+    answer = 0
+    q = deque()
+    q.append(N)
+    dist[N] = 1
+    while q:
+        p = q.popleft()
+        if p == K:
+            answer += 1
+        for next in (p+1,p-1,2*p):
+            if next < 0 or next >= 2*MAX:
+                continue
+            # 지금 next에 있는 값(dist[next])이 갱신할 값(dist[p]+1)보다 작다면 지나가야됨!
+            if dist[next] and dist[next] < dist[p] + 1:
+                continue
+            dist[next] = dist[p] + 1
+            q.append(next)
+    print(dist[K]-1)
+    print(answer)
+    return
+
+N,K = map(int,input().split())
+MAX = max(N,K)
+dist = [0 for _ in range(2*MAX)]
+BFS()
+```
+
+- 다른코드보고 다시 푼 코드
+
+```python
+from collections import deque
+import sys
+input = sys.stdin.readline
+
+N,K = map(int,input().split())
+
+# N이 K보다 크면 -1로만 적용
+if N >= K:
+    print(N-K)
+    print(1)
+else:
+    cnt = 0 #최소거리 경우의수 변수
+    MIN = 100001 #최소거리 초기값
+    visited = [False for _ in range(MIN)]
+    q = deque() # 현위치, dist
+    q.append((K,0))
+    while q:
+        pos, dist = q.popleft() # 현위치, 거리
+        visited[pos] = True # 현위치 방문처리
+
+        # dist가 MIN보다 커지면 더이상 볼 필요 없음
+        if dist > MIN:
+            continue
+        # 위치가 N에 도달하면
+        if pos == N:
+            # dist가 MIN보다 작으면 갱신, 같다면 cnt+1
+            if dist < MIN:
+                MIN = dist
+                cnt = 1
+            elif dist == MIN:
+                cnt += 1
+        else:
+            # pos가 짝수고 방문안했다면 //2
+            if not pos % 2 and not visited[pos//2]:
+                q.append((pos//2,dist+1))
+            # pos가 범위에서 벗어나지 않고 방문안했다면 +1,-1
+            if 0 <= pos - 1 and not visited[pos-1]:
+                q.append((pos-1,dist+1))
+            if pos + 1 <= 100000 and not visited[pos+1]:
+                q.append((pos+1,dist+1))
+    print(MIN)
+    print(cnt)
+
+```
+
+
+
+- 다른코드
+
+```python
+from collections import deque
+
+N, K = map(int, input().split())
+
+# N이 K보다 크면 -1로 내려갈수밖에 없어서 N-K초
+if N >= K:
+    print(N-K)
+    print(1)
+
+else:
+    visited = [False] * 100001
+    ans = 100001 #최소 초 초기값
+    amount = 0 #최소 초 경우의수
+    q = deque()
+    q.append((K, 0)) #현위치, 현위치 초수
+    while q:
+        pos, cnt = q.popleft()
+        visited[pos] = True #현위치 방문표시
+		
+        # 현 위치보다 초수 넘어가면 건너뜀
+        if cnt > ans:
+            continue
+		
+        # 위치가 N에 도달하면
+        if pos == N:
+            # cnt가 ans(최소초수)보다 작으면 갱신, amount도 1개로 리셋
+            if cnt < ans:
+                ans = cnt
+                amount = 1
+            elif cnt == ans: #최소초수랑 같다면 경우의수 1증가
+                amount += 1
+        
+        else:
+            # 짝수일때 방문도 안했다면 q에 pos//2 추가
+            if not pos % 2 and not visited[pos % 2]:
+                q.append((pos // 2, cnt + 1))
+            # 1뺀게 범위에서 벗어나지 않고 방문 안했다면 q에 pos-1추가
+            if 0 <= pos - 1 and not visited[pos-1]:
+                q.append((pos - 1, cnt + 1))
+            # 1더한게 범위에서 벗어나지 않고 방문 안했다면 q에 pos+1추가
+            if pos + 1 <= 100000 and not visited[pos+1]:
+                q.append((pos + 1, cnt + 1))
+
+    print(ans)
+    print(amount)
+```
+
+```python
+import sys
+from collections import deque
+
+MAX_POINT = 100001
+
+def bfs():
+  global cnt,min_time,MAX_POINT
+
+  q = deque()
+  q.append((K,0))
+  visited[K] = True
+
+  while q:
+    n,d = q.popleft()
+
+    visited[n] = True
+
+    if n == N:
+      min_time = d
+      cnt += 1
+      break
+      
+    if n%2==0:
+      if 0<=n//2<MAX_POINT:
+        if not visited[n//2]:
+          q.append((n//2,d+1))
+
+    if 0<=n-1<MAX_POINT:
+      if not visited[n-1]:
+        q.append((n-1,d+1))
+        
+    if 0<=n+1<MAX_POINT:
+      if not visited[n+1]:
+        q.append((n+1,d+1))
+        
+  while q:
+    n,d = q.popleft()
+    
+    if n == N and d==min_time:
+      cnt+= 1
+    
+N,K = map(int,sys.stdin.readline().split())
+
+visited = [False]*(MAX_POINT)
+min_time = 0
+cnt = 0
+
+bfs()
+
+print(min_time)
+print(cnt)
+```
+
