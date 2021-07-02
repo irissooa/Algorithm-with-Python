@@ -2,6 +2,120 @@
 
 [toc]
 
+## 공식
+
+### perm
+
+```python
+def perm(chosen,used,cnt):
+        if len(chosen) == cnt:
+            num = int(''.join(chosen))
+            if isPrime(num):
+                answer.add(num)
+            return
+        for i in range(len(numbers)):
+            if not used[i]:
+                chosen.append(numbers[i])
+                used[i] = True
+                perm(chosen,used,cnt)
+                chosen.pop()
+                used[i] = False
+        
+for c in range(1,len(numbers)+1):
+	used = [False for _ in range(len(numbers))]
+	perm([],used,c)
+```
+
+
+
+```python
+arr = [1,2,3]
+N = 3
+
+sel = [0] * N
+visited = [0] * N
+
+def perm(idx):
+    if idx == N:
+        print(sel)
+        return
+
+    for i in range(N):
+        if not visited[i]:
+            sel[idx] = arr[i]
+            visited[i] = 1
+            perm(idx+1)
+            visited[i] = 0
+
+perm(0)
+```
+
+```python
+arr = [1, 2, 3]
+N = 3
+
+sel = [0] * N
+
+
+def perm(idx, check):
+    if idx == N:
+        print(sel)
+        return
+
+    for i in range(N):
+        if (check & (1 << i)) != 0:
+            continue
+
+        sel[idx] = arr[i]
+        perm(idx + 1, check | (1 << i))
+
+
+perm(0, 0)
+```
+
+
+
+```python
+def perm(idx):
+    if idx == N:
+        print(sel)
+        return
+    for i in range(N):
+        if check[i]:
+            continue
+        check[i] = 1
+        perm(idx+1)
+        check[i]=0
+```
+
+
+
+### comb
+
+```python
+def combination(idx,sidx):
+    if sidx == 7:
+        if sum(R) == 100:
+            for i in sorted(R):
+                print(i)
+            return
+        return
+    if idx == N:
+        return
+    R[sidx] = height[idx]
+    combination(idx+1,sidx+1)
+    combination(idx+1,sidx)
+
+height = []
+for t in range(9):
+    height.append(int(input()))
+N = 9
+R = [0]*7
+combination(0,0)
+```
+
+
+
 ## 1. itertools 모듈
 
 ```python
