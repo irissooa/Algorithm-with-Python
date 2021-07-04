@@ -464,7 +464,7 @@ def perm(idx):
 perm(0)
 ```
 
-### 모든 순열(코드!!!)
+### 모든 순열(swap코드)
 
 ```python
 def perm(a):
