@@ -25,10 +25,41 @@ for i in range(N-1,-1,-1):
 answer.reverse()
 print(*answer)
 '''
+'''
 N = int(input())
 top = list(map(int,input().split()))
-answer = [0]
-post = top[0]
-for i in range(1,N):
-    if post >= top[i]:
-        answer.append(i+1)
+answer = []
+stack = [] #(idx,값) 넣음
+for i in range(N):
+    while stack:
+        # 수신가능
+        if stack[-1][1] >= top[i]:
+            answer.append(stack[-1][0] + 1)
+            break
+        else:
+            stack.pop()
+    # 스택이 비면 수신할 탑이 없다.
+    if not stack:
+        answer.append(0)
+    stack.append([i,top[i]])
+print(" ".join(map(str,answer)))
+'''
+# 다른코드
+def deep(idx,num):
+    if idx == 0:
+        return 0
+    if top[idx] >= num:
+        return idx
+    else:
+        return deep(result[idx],num)
+
+N = int(input())+1
+top = list(map(int,input().split()))
+top.insert(0,0)
+result = [0]*N
+for i in range(2,N):
+    if top[i-1] > top[i]:
+        result[i] = i-1
+    else:
+        result[i] = deep(result[i-1],top[i])
+print(' '.join(map(str,result[1:])))
