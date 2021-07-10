@@ -3299,3 +3299,102 @@ print(min_time)
 print(cnt)
 ```
 
+
+
+##  프로그래머스_49189_가장 먼노드
+
+> [프로그래머스_49189_가장 먼노드](https://programmers.co.kr/learn/courses/30/lessons/49189)
+
+```python
+from collections import deque
+
+def solution(n, edge):
+    answer = 0
+    adj = [[] * (n+1) for i in range(n+1)]
+    for i in range(len(edge)):
+        s,e = edge[i]
+        adj[s].append(e)
+        adj[e].append(s)
+    dist = [0] * (n+1)
+    q = deque(adj[1])
+    dist[1] = 1
+    for i in q:
+        dist[i] = dist[1] + 1
+    while q:
+        now = q.popleft()
+        for i in adj[now]:
+            next = i
+            if dist[next]:
+                continue
+            dist[next] = dist[now] + 1
+            q.append(next)
+    MAX = max(dist)
+    for i in dist:
+        if i == MAX:
+            answer += 1
+    return answer
+```
+
+- 다른 풀이
+
+```python
+def solution(n, edge):
+    graph =[  [] for _ in range(n + 1) ]
+    distances = [ 0 for _ in range(n) ]
+    is_visit = [False for _ in range(n)]
+    queue = [0]
+    is_visit[0] = True
+    for (a, b) in edge:
+        graph[a-1].append(b-1)
+        graph[b-1].append(a-1)
+
+    while queue:
+        i = queue.pop(0)
+
+        for j in graph[i]:
+            if is_visit[j] == False:
+                is_visit[j] = True
+                queue.append(j)
+                distances[j] = distances[i] + 1
+
+    distances.sort(reverse=True)
+    answer = distances.count(distances[0])
+
+    return answer
+```
+
+```python
+class Graph():
+    def __init__(self, num_edge, vertices):
+        self.vertex = [None]
+        self.num_edge = num_edge
+        for num in range(num_edge):
+            self.vertex.append([])
+        self.createGraph(vertices)
+    def createGraph(self, vertices):
+        for vertex in vertices:
+            self.vertex[vertex[0]].append(vertex[1])
+            self.vertex[vertex[1]].append(vertex[0])
+    def shortestNodes(self):
+        dist = [float('inf')] * (self.num_edge + 1)
+        q = [(1, 0)]
+        while len(q) > 0:
+            (cur, depth) = q.pop(0)
+            if depth < dist[cur]:
+                dist[cur] = depth
+                for edge in self.vertex[cur]:
+                    q.append((edge, depth + 1))
+        dist = [x for x in dist if x < float('inf')]
+        print(dist)
+        max_dist = max(dist)
+        dist = list(filter(lambda x: x == max_dist, dist))
+        return len(dist)
+
+def solution(n, edge):
+    g = Graph(n, edge)
+    return g.shortestNodes()
+
+```
+
+
+
